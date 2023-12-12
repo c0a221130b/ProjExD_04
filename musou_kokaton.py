@@ -36,6 +36,7 @@ def calc_orientation(org: pg.Rect, dst: pg.Rect) -> tuple[float, float]:
     norm = math.sqrt(x_diff**2+y_diff**2)
     return x_diff/norm, y_diff/norm
 
+
 class Score:
     """
     打ち落とした爆弾，敵機の数をスコアとして表示するクラス
@@ -53,6 +54,7 @@ class Score:
     def update(self, screen: pg.Surface):
         self.image = self.font.render(f"Score: {self.value}", 0, self.color)
         screen.blit(self.image, self.rect)
+
 
 class Bird(pg.sprite.Sprite):
     """
@@ -263,7 +265,6 @@ class Enemy(pg.sprite.Sprite):
         self.rect.centery += self.vy
 
 
-
 class Shield(pg.sprite.Sprite):
     """
     防御壁を出現させるクラス
@@ -277,7 +278,6 @@ class Shield(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.Surface((20, obj.rect.height*2.0))
         pg.draw.rect(self.image, (0, 0, 255), (0, 0, 20, obj.rect.height*2.))
-        self.image.set_colorkey((0, 0, 0))
         self.vx, self.vy = obj.dire
         self.aa = math.degrees(math.atan2(-self.vy, self.vx))
         self.image = pg.transform.rotozoom(self.image, self.aa, 1.0)
@@ -285,15 +285,12 @@ class Shield(pg.sprite.Sprite):
         self.rect.centerx = obj.rect.centerx+obj.rect.width*self.vx
         self.rect.centery = obj.rect.centery+obj.rect.height*self.vy
         self.life = life
+        self.image.set_colorkey((0, 0, 0))
 
     def update(self):
-        """
-        
-        """
         self.life -= 1
         if self.life < 0:
             self.kill()
-
 
 
 class Gravity(pg.sprite.Sprite):
@@ -320,7 +317,8 @@ class Gravity(pg.sprite.Sprite):
         self.life -= 1
         if self.life < 0:
             self.kill()
-            
+
+          
 class EMP():
     """
     発動時に存在する敵機と爆弾を無効化する
@@ -346,6 +344,7 @@ class EMP():
         screen.blit(image, [0, 0])
         pg.display.update()
         time.sleep(1)
+
 
 def main():
     pg.display.set_caption("真！こうかとん無双")
