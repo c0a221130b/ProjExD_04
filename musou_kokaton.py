@@ -428,12 +428,16 @@ def main():
 
 
             if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
-                bird.change_img(8, screen) # こうかとん悲しみエフェクト
-                score.update(screen)
-                pg.display.update()
-                time.sleep(2)
-                return
-
+                for b in bombs:
+                    if b.state == "inactive":
+                        continue
+                    else:
+                        bird.change_img(8, screen) # こうかとん悲しみエフェクト
+                        score.update(screen)
+                        pg.display.update()
+                        time.sleep(2)
+                        return
+                
             if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
                 for bomb in pg.sprite.groupcollide(bomb, bird, True, True).keys():
                     exps.add(Explosion(bombs, 50))
