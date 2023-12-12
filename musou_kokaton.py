@@ -259,6 +259,37 @@ class Enemy(pg.sprite.Sprite):
 
 
 
+class Shield(pg.sprite.Sprite):
+    """
+    防御壁を出現させるクラス
+    """
+    def __init__(self, obj: Bird, life: int):
+        """
+        防御壁を生成する
+        引数1 obj:防御壁を出すこうかとん
+        引数2 life:持続時間
+        """
+        super().__init__()
+        self.image = pg.Surface((20, obj.rect.height*2.0))
+        pg.draw.rect(self.image, (0, 0, 255), (0, 0, 20, obj.rect.height*2.))
+        self.image.set_colorkey((0, 0, 0))
+        self.vx, self.vy = obj.dire
+        self.aa = math.degrees(math.atan2(-self.vy, self.vx))
+        self.image = pg.transform.rotozoom(self.image, self.aa, 1.0)
+        self.rect = self.image.get_rect(center=obj.rect.center)
+        self.rect.centerx = obj.rect.centerx+obj.rect.width*self.vx
+        self.rect.centery = obj.rect.centery+obj.rect.height*self.vy
+        self.life = life
+
+    def update(self):
+        """
+        
+        """
+        self.life -= 1
+        if self.life < 0:
+            self.kill()
+
+
 
 class Gravity(pg.sprite.Sprite):
     """
@@ -322,6 +353,7 @@ def main():
     beams = pg.sprite.Group()
     exps = pg.sprite.Group()
     emys = pg.sprite.Group()
+    shields = pg.sprite.Group()
     gravity = pg.sprite.Group()
 
     tmr = 0
@@ -335,6 +367,11 @@ def main():
               
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
+
+            if event.type == pg.KEYDOWN and event.key == pg.K_CAPSLOCK:
+                if score.value >= 50 and len(shields) == 0:
+                    shields.add(Shield(bird, 400))
+                    score.value -= 50
 
             if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
                 if score.value > 200:
@@ -355,6 +392,18 @@ def main():
                 # 敵機が停止状態に入ったら，intervalに応じて爆弾投下
                 bombs.add(Bomb(emy, bird))
 
+
+
+        for bomb in pg.sprite.groupcollide(bombs, shields, True, False).keys():
+            exps.add(Explosion(bomb, 50))
+            score.value += 1
+
+        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
+            bird.change_img(8, screen) # こうかとん悲しみエフェクト
+            score.update(screen)
+            pg.display.update()
+            time.sleep(2)
+            return
 
         if bird.state == 'normal':
             for emy in pg.sprite.groupcollide(emys, beams, True, True).keys():
@@ -414,9 +463,11 @@ def main():
         exps.update()
         exps.draw(screen)
         score.update(screen)
+        shields.update()
+        shields.draw(screen)
         gravity.update()
         gravity.draw(screen)
-        
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
